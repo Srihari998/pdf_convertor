@@ -8,109 +8,90 @@ interface AdSlotProps {
 }
 
 export function AdSlot({ position = 'middle', className = '' }: AdSlotProps) {
-  const nativeRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (position === 'native' && nativeRef.current) {
-      // Clear container and inject native ad script
-      nativeRef.current.innerHTML = `
-        <div id="container-6ad2dd96744a2d41993a7588d53dcd3e"></div>
-      `;
+    const container = containerRef.current;
+    if (!container) return;
+
+    // Clear previous ad nodes
+    container.innerHTML = '';
+
+    if (position === 'native') {
+      // Native Ad Unit
+      const nativeDiv = document.createElement('div');
+      nativeDiv.id = 'container-6ad2dd96744a2d41993a7588d53dcd3e';
+      container.appendChild(nativeDiv);
+
       const script = document.createElement('script');
       script.async = true;
       script.setAttribute('data-cfasync', 'false');
       script.src = 'https://pl31226184.profitableratecpmnetwork.com/6ad2dd96744a2d41993a7588d53dcd3e/invoke.js';
-      nativeRef.current.appendChild(script);
+      container.appendChild(script);
+      return;
+    }
+
+    // Banner Ads (728x90 on Desktop >= 768px, 300x250 on Mobile < 768px)
+    const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 768;
+    const key = isDesktop ? '4ba468a0419895bfe8d687983400c166' : '0fca1f1dd409004b21b68c1ab3a2c18e';
+    const width = isDesktop ? 728 : 300;
+    const height = isDesktop ? 90 : 250;
+
+    const iframe = document.createElement('iframe');
+    iframe.width = width.toString();
+    iframe.height = height.toString();
+    iframe.style.border = 'none';
+    iframe.style.overflow = 'hidden';
+    iframe.style.display = 'block';
+    iframe.style.margin = '0 auto';
+    iframe.scrolling = 'no';
+    iframe.title = 'Advertisement';
+
+    container.appendChild(iframe);
+
+    try {
+      const doc = iframe.contentWindow?.document || iframe.contentDocument;
+      if (doc) {
+        doc.open();
+        doc.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body { display: flex; justify-content: center; align-items: center; background: transparent; overflow: hidden; }
+              </style>
+            </head>
+            <body>
+              <script type="text/javascript">
+                atOptions = {
+                  'key' : '${key}',
+                  'format' : 'iframe',
+                  'height' : ${height},
+                  'width' : ${width},
+                  'params' : {}
+                };
+              </script>
+              <script type="text/javascript" src="https://www.highrevenueformat.com/${key}/invoke.js"></script>
+            </body>
+          </html>
+        `);
+        doc.close();
+      }
+    } catch (err) {
+      console.warn('Ad frame injection error:', err);
     }
   }, [position]);
-
-  if (position === 'native') {
-    return (
-      <div className={`my-8 flex flex-col items-center justify-center p-2 text-center overflow-hidden ${className}`}>
-        <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2 block">
-          Sponsored Recommendations
-        </span>
-        <div ref={nativeRef} className="w-full flex justify-center min-h-[120px]" />
-      </div>
-    );
-  }
-
-  // Banner Ads (Desktop 728x90 vs Mobile 300x250)
-  const desktopAdHtml = `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <style>
-          body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; background: transparent; }
-        </style>
-      </head>
-      <body>
-        <script type="text/javascript">
-          atOptions = {
-            'key' : '4ba468a0419895bfe8d687983400c166',
-            'format' : 'iframe',
-            'height' : 90,
-            'width' : 728,
-            'params' : {}
-          };
-        </script>
-        <script type="text/javascript" src="https://www.highrevenueformat.com/4ba468a0419895bfe8d687983400c166/invoke.js"></script>
-      </body>
-    </html>
-  `;
-
-  const mobileAdHtml = `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <style>
-          body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; background: transparent; }
-        </style>
-      </head>
-      <body>
-        <script type="text/javascript">
-          atOptions = {
-            'key' : '0fca1f1dd409004b21b68c1ab3a2c18e',
-            'format' : 'iframe',
-            'height' : 250,
-            'width' : 300,
-            'params' : {}
-          };
-        </script>
-        <script type="text/javascript" src="https://www.highrevenueformat.com/0fca1f1dd409004b21b68c1ab3a2c18e/invoke.js"></script>
-      </body>
-    </html>
-  `;
 
   return (
     <div className={`my-8 flex flex-col items-center justify-center p-2 text-center overflow-hidden ${className}`}>
       <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2 block">
-        Advertisement
+        {position === 'native' ? 'Sponsored Recommendations' : 'Advertisement'}
       </span>
-
-      {/* Desktop Banner (728x90) */}
-      <div className="hidden md:flex justify-center w-full max-w-[728px] h-[90px] overflow-hidden rounded-xl bg-transparent">
-        <iframe
-          srcDoc={desktopAdHtml}
-          width={728}
-          height={90}
-          title="Advertisement"
-          scrolling="no"
-          className="border-0 overflow-hidden"
-        />
-      </div>
-
-      {/* Mobile Banner (300x250) */}
-      <div className="flex md:hidden justify-center w-full max-w-[300px] h-[250px] overflow-hidden rounded-xl bg-transparent">
-        <iframe
-          srcDoc={mobileAdHtml}
-          width={300}
-          height={250}
-          title="Advertisement"
-          scrolling="no"
-          className="border-0 overflow-hidden"
-        />
-      </div>
+      <div
+        ref={containerRef}
+        className="w-full flex justify-center items-center min-h-[90px] overflow-hidden"
+      />
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '../components/layout/ThemeProvider';
@@ -58,8 +59,6 @@ export const metadata: Metadata = {
       'Fast, private, and free document utilities running entirely inside your web browser.',
   },
 };
-
-import Script from 'next/script';
 
 export default function RootLayout({
   children,
