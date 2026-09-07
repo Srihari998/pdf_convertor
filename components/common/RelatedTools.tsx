@@ -1,49 +1,31 @@
 import React from 'react';
-import { TOOLS_REGISTRY } from '../../lib/tools/registry';
+import { ToolMetadata } from '../../lib/types';
+import { getRelatedTools, getToolsByCategory } from '../../lib/tools/registry';
 import { ToolCard } from './ToolCard';
-import { Sparkles } from 'lucide-react';
 
 interface RelatedToolsProps {
-  currentToolId: string;
-  relatedIds?: string[];
-  category?: string;
-  maxItems?: number;
-  className?: string;
+  currentTool: ToolMetadata;
 }
 
-export function RelatedTools({
-  currentToolId,
-  relatedIds = [],
-  category,
-  maxItems = 4,
-  className = '',
-}: RelatedToolsProps) {
-  let related = TOOLS_REGISTRY.filter(
-    (t) => t.id !== currentToolId && relatedIds.includes(t.id)
-  );
-
-  if (related.length < maxItems && category) {
-    const fallbackCategoryTools = TOOLS_REGISTRY.filter(
-      (t) => t.id !== currentToolId && t.category === category && !related.some((r) => r.id === t.id)
-    );
-    related = [...related, ...fallbackCategoryTools];
+export function RelatedTools({ currentTool }: RelatedToolsProps) {
+  let related = getRelatedTools(currentTool);
+  if (related.length === 0) {
+    related = getToolsByCategory(currentTool.category).filter((t) => t.id !== currentTool.id);
   }
 
-  const finalTools = related.slice(0, maxItems);
-
-  if (finalTools.length === 0) return null;
+  const items = related.slice(0, 4);
+  if (items.length === 0) return null;
 
   return (
-    <section className={`mt-8 pt-8 border-t border-slate-200 dark:border-slate-800 ${className}`}>
-      <div className="flex items-center gap-2 mb-5">
-        <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+    <section className="space-y-4 pt-4">
+      <div className="flex items-center justify-between">
         <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
-          Related Useful Calculators & Tools
+          Related Document Tools
         </h2>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {finalTools.map((tool) => (
+        {items.map((tool) => (
           <ToolCard key={tool.id} tool={tool} showCategory={true} />
         ))}
       </div>

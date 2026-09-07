@@ -3,7 +3,7 @@ import { TOOLS_REGISTRY } from '../lib/tools/registry';
 import { CATEGORIES } from '../lib/tools/categories';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://calcnest.com';
+  const baseUrl = 'https://documentnest.vercel.app';
 
   const staticPages = [
     '',

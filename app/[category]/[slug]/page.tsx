@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: ToolPageProps): Promise<Metad
   const tool = getToolBySlug(slug);
   if (!tool) return { title: 'Tool Not Found' };
 
-  const title = `${tool.name} — Free Online Calculator`;
+  const title = `${tool.name} — Free Online Document Tool`;
   const description = tool.shortDescription;
 
   return {
@@ -32,12 +32,12 @@ export async function generateMetadata({ params }: ToolPageProps): Promise<Metad
     description,
     keywords: tool.keywords,
     alternates: {
-      canonical: `https://calcnest.com/${tool.categorySlug}/${tool.slug}`,
+      canonical: `https://documentnest.vercel.app/${tool.categorySlug}/${tool.slug}`,
     },
     openGraph: {
       title,
       description,
-      url: `https://calcnest.com/${tool.categorySlug}/${tool.slug}`,
+      url: `https://documentnest.vercel.app/${tool.categorySlug}/${tool.slug}`,
       type: 'website',
     },
     twitter: {
@@ -55,8 +55,8 @@ export default async function ToolPage({ params }: ToolPageProps) {
 
   const webAppSchema = generateWebApplicationSchema(tool);
   const breadcrumbSchema = generateBreadcrumbSchema([
-    { name: tool.category.charAt(0).toUpperCase() + tool.category.slice(1), item: `https://calcnest.com/${tool.categorySlug}` },
-    { name: tool.name, item: `https://calcnest.com/${tool.categorySlug}/${tool.slug}` },
+    { name: tool.category.toUpperCase() + ' Tools', item: `https://documentnest.vercel.app/${tool.categorySlug}` },
+    { name: tool.name, item: `https://documentnest.vercel.app/${tool.categorySlug}/${tool.slug}` },
   ]);
   const faqSchema = generateFAQSchema(tool.faqs);
 

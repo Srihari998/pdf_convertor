@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Search, Star, Filter, Sparkles, Grid } from 'lucide-react';
+import { Search, Star, Grid, Filter } from 'lucide-react';
 import { TOOLS_REGISTRY } from '../../lib/tools/registry';
 import { CATEGORIES } from '../../lib/tools/categories';
 import { ToolCard } from '../../components/common/ToolCard';
 import { Breadcrumbs } from '../../components/layout/Breadcrumbs';
-import { AdBanner } from '../../components/ads/AdBanner';
-import { getFavorites } from '../../lib/storage';
+import { AdSlot } from '../../components/common/AdSlot';
+import { getFavorites } from '../../lib/utils/storage';
 
 export default function ToolsDirectoryPage() {
   const [search, setSearch] = useState('');
@@ -50,10 +50,10 @@ export default function ToolsDirectoryPage() {
           <span>Full Tool Index</span>
         </div>
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-slate-950 dark:text-white">
-          All 100+ Free Online Tools
+          All 22 Online Document Tools
         </h1>
         <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
-          Search, filter, and access any utility across all categories. 100% free with instant browser execution.
+          Search, filter, and access any utility across PDF, Image, Document, and OCR categories. 100% free with instant in-browser WebAssembly processing.
         </p>
       </div>
 
@@ -65,7 +65,7 @@ export default function ToolsDirectoryPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search tools by name, category, or problem... (e.g. emi, attendance, json, %)"
+            placeholder="Search tools by name or purpose... (e.g. merge, compress, ocr, split, image)"
             className="w-full pl-12 pr-4 py-3.5 rounded-2xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm sm:text-base text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600"
           />
         </div>
@@ -148,7 +148,7 @@ export default function ToolsDirectoryPage() {
       </section>
 
       {/* Ad Placement */}
-      <AdBanner />
+      <AdSlot position="bottom" />
     </div>
   );
 }

@@ -3,9 +3,9 @@ import { Mail, MessageSquare, Sparkles } from 'lucide-react';
 import { Breadcrumbs } from '../../components/layout/Breadcrumbs';
 
 export const metadata: Metadata = {
-  title: 'Contact CalcNest Team',
+  title: 'Contact DocumentNest Support & Feedback',
   description:
-    'Have a suggestion for a new calculator or feedback? Contact the CalcNest team.',
+    'Contact the DocumentNest team for tool suggestions, feature requests, or technical feedback.',
 };
 
 export default function ContactPage() {
@@ -19,10 +19,10 @@ export default function ContactPage() {
           <span>Feedback &amp; Suggestions</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-950 dark:text-white">
-          Contact CalcNest
+          Contact DocumentNest
         </h1>
         <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
-          We are continuously expanding CalcNest to 100+ tools. If you would like us to add a specific calculator, report a formula bug, or share general feedback, we&apos;d love to hear from you.
+          Have a suggestion for a new PDF or document utility? Found an issue with a specific document layout? Let us know and we will look into it!
         </p>
       </div>
 
@@ -36,23 +36,23 @@ export default function ContactPage() {
               Direct Email
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-              Send us an email and our engineering team will get back to you within 24 hours.
+              Send us an email and our engineering team will get back to you promptly.
             </p>
             <a
-              href="mailto:contact@calcnest.com"
+              href="mailto:contact@documentnest.com"
               className="inline-block mt-3 font-mono font-bold text-blue-600 dark:text-blue-400 hover:underline text-base"
             >
-              contact@calcnest.com
+              contact@documentnest.com
             </a>
           </div>
         </div>
 
         <div className="pt-6 border-t border-slate-200 dark:border-slate-800">
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-            Suggest a New Tool
+            Suggest a New Document Utility
           </h3>
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
-            Tell us which tool or converter you need and our team will build and deploy it!
+            Tell us what file format or conversion tool you need and we will engineer a browser-compatible solution for it.
           </p>
         </div>
       </div>

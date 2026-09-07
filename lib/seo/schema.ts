@@ -1,37 +1,25 @@
-import { ToolMetadata } from '../types';
+import { ToolMetadata, FAQItem } from '../types';
 
-export function generateWebApplicationSchema(tool: ToolMetadata, siteUrl = 'https://calcnest.com') {
+export function generateWebApplicationSchema(tool: ToolMetadata, baseUrl: string = 'https://documentnest.vercel.app') {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
-    name: `${tool.name} — CalcNest`,
-    applicationCategory: 'UtilityApplication',
+    name: `${tool.name} — DocumentNest`,
+    url: `${baseUrl}/${tool.categorySlug}/${tool.slug}`,
+    description: tool.shortDescription,
+    applicationCategory: 'UtilitiesApplication',
     operatingSystem: 'All',
-    url: `${siteUrl}/${tool.categorySlug}/${tool.slug}`,
-    description: tool.longDescription,
-    browserRequirements: 'Requires JavaScript. Requires HTML5.',
+    browserRequirements: 'Requires JavaScript and HTML5 Canvas support',
     offers: {
       '@type': 'Offer',
       price: '0',
       priceCurrency: 'USD',
     },
+    featureList: tool.features.join(', '),
   };
 }
 
-export function generateBreadcrumbSchema(items: { name: string; item: string }[]) {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: items.map((crumb, idx) => ({
-      '@type': 'ListItem',
-      position: idx + 1,
-      name: crumb.name,
-      item: crumb.item,
-    })),
-  };
-}
-
-export function generateFAQSchema(faqs: { question: string; answer: string }[]) {
+export function generateFAQSchema(faqs: FAQItem[]) {
   if (!faqs || faqs.length === 0) return null;
   return {
     '@context': 'https://schema.org',
@@ -44,5 +32,28 @@ export function generateFAQSchema(faqs: { question: string; answer: string }[]) 
         text: faq.answer,
       },
     })),
+  };
+}
+
+export function generateBreadcrumbSchema(
+  items: { name: string; item: string }[]
+) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://documentnest.vercel.app',
+      },
+      ...items.map((it, idx) => ({
+        '@type': 'ListItem',
+        position: idx + 2,
+        name: it.name,
+        item: it.item,
+      })),
+    ],
   };
 }

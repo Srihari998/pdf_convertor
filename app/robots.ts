@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: '*',
       allow: '/',
     },
-    sitemap: 'https://calcnest.com/sitemap.xml',
+    sitemap: 'https://documentnest.vercel.app/sitemap.xml',
   };
 }

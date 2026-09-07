@@ -5,27 +5,23 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   Search,
-  Zap,
+  Layers,
+  Image as ImageIcon,
+  BookOpen,
+  ScanText,
   ShieldCheck,
-  Smartphone,
-  Sparkles,
+  Zap,
+  Lock,
   ArrowRight,
+  Sparkles,
+  CheckCircle2,
   TrendingUp,
-  GraduationCap,
-  IndianRupee,
-  ArrowLeftRight,
-  Code2,
-  FileText,
-  Calendar,
-  Calculator,
-  Activity,
-  CheckCircle,
 } from 'lucide-react';
 import { TOOLS_REGISTRY, getPopularTools } from '../lib/tools/registry';
 import { CATEGORIES } from '../lib/tools/categories';
 import { ToolCard } from '../components/common/ToolCard';
-import { AdBanner } from '../components/ads/AdBanner';
 import { FAQSection } from '../components/common/FAQSection';
+import { AdSlot } from '../components/common/AdSlot';
 
 export default function HomePage() {
   const router = useRouter();
@@ -35,7 +31,6 @@ export default function HomePage() {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      // Find matching tool
       const q = searchQuery.toLowerCase().trim();
       const match = TOOLS_REGISTRY.find(
         (t) =>
@@ -53,76 +48,85 @@ export default function HomePage() {
 
   const homeFaqs = [
     {
-      question: 'Is CalcNest really free to use?',
-      answer: 'Yes, 100% free! There are no subscription fees, paywalls, or hidden charges for any of our 100+ calculators and utilities.',
+      question: 'Are my confidential files uploaded to any external server?',
+      answer: 'No. DocumentNest is built with a strict privacy-first architecture. All PDF, image, and document operations run 100% locally inside your web browser via WebAssembly and HTML5 Canvas. Your files never leave your computer or smartphone.',
     },
     {
-      question: 'Do I need to create an account or sign in?',
-      answer: 'No registration or login is required. You can start using any tool immediately without providing an email address or password.',
+      question: 'Is DocumentNest really free with no hidden charges?',
+      answer: 'Yes! There are no paid subscriptions, file watermarks, daily quotas, or forced account registrations. Every tool is 100% free to use.',
     },
     {
-      question: 'Is my data secure and private?',
-      answer: 'Yes! All calculations, string transformations, and QR code generations run completely locally in your browser via client-side JavaScript. Your confidential numbers, financial data, and code never leave your device.',
+      question: 'How does browser-based PDF processing work?',
+      answer: 'We leverage modern WebAssembly libraries (including pdf-lib, Tesseract.js, and browser Canvas APIs) to parse, modify, and re-encode document binaries in your device memory at native hardware speeds.',
     },
     {
-      question: 'How accurate are the academic and financial calculations?',
-      answer: 'All formulas use industry-standard mathematics (e.g. reducing-balance EMI loan formulas, compound interest equations, and weighted credit GPA formulas). Financial and medical tools include clear disclaimers for informational context.',
+      question: 'Can I use DocumentNest on mobile phones and tablets?',
+      answer: 'Yes! All tools are fully responsive and engineered for touchscreens across iOS Safari, Android Chrome, and desktop browsers.',
     },
   ];
 
   const getCategoryIcon = (id: string) => {
     switch (id) {
-      case 'student':
-        return <GraduationCap className="w-6 h-6 text-blue-600 dark:text-blue-400" />;
-      case 'finance':
-        return <IndianRupee className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />;
-      case 'converters':
-        return <ArrowLeftRight className="w-6 h-6 text-violet-600 dark:text-violet-400" />;
-      case 'developer':
-        return <Code2 className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />;
-      case 'text':
-        return <FileText className="w-6 h-6 text-amber-600 dark:text-amber-400" />;
-      case 'date-time':
-        return <Calendar className="w-6 h-6 text-rose-600 dark:text-rose-400" />;
-      case 'calculators':
-        return <Calculator className="w-6 h-6 text-sky-600 dark:text-sky-400" />;
-      case 'health':
-        return <Activity className="w-6 h-6 text-lime-600 dark:text-lime-400" />;
+      case 'pdf':
+        return <Layers className="w-6 h-6 text-rose-600 dark:text-rose-400" />;
+      case 'image':
+        return <ImageIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />;
+      case 'document':
+        return <BookOpen className="w-6 h-6 text-amber-600 dark:text-amber-400" />;
+      case 'ocr':
+        return <ScanText className="w-6 h-6 text-violet-600 dark:text-violet-400" />;
       default:
-        return <Calculator className="w-6 h-6 text-blue-600 dark:text-blue-400" />;
+        return <Layers className="w-6 h-6 text-blue-600" />;
     }
   };
 
   return (
-    <div className="space-y-16 pb-16">
+    <div className="space-y-16 sm:space-y-20 pb-16">
       {/* Hero Section */}
-      <section className="relative pt-12 sm:pt-20 pb-8 overflow-hidden bg-gradient-to-b from-blue-50/50 via-white to-white dark:from-slate-900/50 dark:via-slate-950 dark:to-slate-950 border-b border-slate-100 dark:border-slate-800/80">
+      <section className="relative pt-12 sm:pt-20 pb-12 overflow-hidden bg-gradient-to-b from-blue-50/50 via-white to-white dark:from-slate-900/50 dark:via-slate-950 dark:to-slate-950 border-b border-slate-100 dark:border-slate-800/80">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/80 border border-blue-200 dark:border-blue-800 text-xs font-bold text-blue-700 dark:text-blue-300">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/80 border border-blue-200 dark:border-blue-800 text-xs font-bold text-blue-700 dark:text-blue-300 shadow-xs">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>100+ Free Online Calculators &amp; Useful Utilities</span>
+            <span>100% Free • Client-Side WebAssembly Processing • Zero Server Upload</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-950 dark:text-white max-w-3xl mx-auto leading-tight">
-            Calculate, Convert &amp; Solve Problems{' '}
-            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Instantly.
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-950 dark:text-white max-w-4xl mx-auto leading-tight">
+            Free Online PDF &amp;{' '}
+            <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
+              Document Tools
             </span>
           </h1>
 
           <p className="text-base sm:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            Free, fast, and privacy-first online tools. Academic CGPA &amp; attendance calculators, loan EMIs, SIP mutual fund returns, unit conversions, and developer tools.
+            Edit, convert, merge, split, compress, and manage your documents directly in your browser. Fast, private, and always free.
           </p>
 
+          {/* Action CTAs */}
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <Link
+              href="/pdf"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm sm:text-base shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95"
+            >
+              <span>Explore PDF Tools</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              href="/tools"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold text-sm sm:text-base transition-colors"
+            >
+              <span>Browse All 22 Tools</span>
+            </Link>
+          </div>
+
           {/* Large Hero Search Box */}
-          <form onSubmit={handleSearchSubmit} className="max-w-2xl mx-auto pt-2">
+          <form onSubmit={handleSearchSubmit} className="max-w-2xl mx-auto pt-4">
             <div className="relative flex items-center shadow-lg rounded-2xl border-2 border-blue-600/30 focus-within:border-blue-600 bg-white dark:bg-slate-900 p-2 transition-all">
               <Search className="w-6 h-6 text-slate-400 ml-3 shrink-0" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="What do you want to calculate? (e.g. EMI, CGPA, Attendance, Percentage, Age...)"
+                placeholder="Search PDF and document tools... (e.g. merge, split, compress, ocr, jpg)"
                 className="w-full px-3 py-2 text-sm sm:text-base text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-hidden bg-transparent"
               />
               <button
@@ -135,7 +139,7 @@ export default function HomePage() {
 
             <div className="flex items-center justify-center gap-2 flex-wrap text-xs text-slate-500 dark:text-slate-400 mt-3">
               <span>Popular searches:</span>
-              {['EMI', 'CGPA', 'Classes Can I Miss', 'Percentage', 'SIP', 'Age', 'JSON Formatter'].map((term) => (
+              {['Merge PDF', 'Split PDF', 'Compress PDF', 'JPG to PDF', 'Image to Text', 'Watermark'].map((term) => (
                 <button
                   key={term}
                   type="button"
@@ -170,7 +174,7 @@ export default function HomePage() {
                 Most Popular Tools
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                Calculators and utilities used by thousands daily
+                Top utilities for rapid document, image, and PDF management
               </p>
             </div>
           </div>
@@ -179,7 +183,7 @@ export default function HomePage() {
             href="/tools"
             className="text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
           >
-            <span>View all 100+ tools</span>
+            <span>View all 22 tools</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -191,19 +195,19 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Ad Placement */}
+      {/* Ad Placeholder */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <AdBanner />
+        <AdSlot position="top" />
       </div>
 
-      {/* Browse All Categories Grid */}
+      {/* Explore Categories Grid */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-10 space-y-2">
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-950 dark:text-white">
-            Explore All Utility Categories
+            Explore All Tool Categories
           </h2>
           <p className="text-sm text-slate-600 dark:text-slate-400">
-            From academic grading and financial compounding to web developer tools and unit conversions.
+            From multi-file PDF merges and rotations to client-side OCR and Markdown document compilation.
           </p>
         </div>
 
@@ -220,7 +224,7 @@ export default function HomePage() {
                 className="group relative rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs hover:shadow-lg hover:border-blue-400 dark:hover:border-blue-600 transition-all duration-200 hover:-translate-y-1 flex flex-col justify-between"
               >
                 <div>
-                  <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 w-fit mb-4 group-hover:scale-110 transition-transform">
+                  <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 w-fit mb-4 group-hover:scale-110 transition-transform">
                     {getCategoryIcon(category.id)}
                   </div>
 
@@ -234,7 +238,7 @@ export default function HomePage() {
                 </div>
 
                 <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-semibold">
-                  <span className="text-slate-400 dark:text-slate-500">{count}+ Working Tools</span>
+                  <span className="text-slate-400 dark:text-slate-500">{count} Working Tools</span>
                   <span className="text-blue-600 dark:text-blue-400 group-hover:translate-x-1 transition-transform">
                     Explore →
                   </span>
@@ -245,71 +249,63 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Why Choose CalcNest Section */}
+      {/* Private by Design Section */}
       <section className="bg-slate-50 dark:bg-slate-900/50 border-y border-slate-200/80 dark:border-slate-800 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-xs font-bold text-emerald-700 dark:text-emerald-300">
+              <Lock className="w-3.5 h-3.5" />
+              <span>Private by Design</span>
+            </div>
             <h2 className="text-2xl sm:text-3xl font-black text-slate-950 dark:text-white">
-              Why Use CalcNest?
+              Why Document Privacy Matters
             </h2>
             <p className="text-sm text-slate-600 dark:text-slate-400">
-              Built for speed, accuracy, and zero hassle.
+              Unlike other document converters that upload your contracts, tax returns, and medical records to remote servers, DocumentNest processes your files right inside your browser.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-xs space-y-3">
-              <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 w-fit">
-                <Zap className="w-5 h-5" />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-xs space-y-3">
+              <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 w-fit">
+                <ShieldCheck className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                Zero Cloud Uploads
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                Your documents, PDFs, and photos are decoded and compiled in client-side WebAssembly memory. They are never transmitted over the internet to any server.
+              </p>
+            </div>
+
+            <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-xs space-y-3">
+              <div className="p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 w-fit">
+                <Zap className="w-6 h-6" />
+              </div>
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                Instant Processing Speed
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                Without network upload and download bottlenecks, your merges, splits, and compressions complete at the raw processing speed of your device CPU.
+              </p>
+            </div>
+
+            <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-xs space-y-3">
+              <div className="p-3 rounded-2xl bg-violet-50 dark:bg-violet-950/60 text-violet-600 w-fit">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
                 100% Free Forever
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                No paid tiers, no subscriptions, and no gated features. Every calculation tool is open and free to all users.
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-xs space-y-3">
-              <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 w-fit">
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                Zero Data Tracking
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                All deterministic calculations execute 100% in your local browser memory. Your financial numbers and passwords never touch a server.
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-xs space-y-3">
-              <div className="p-2.5 rounded-xl bg-violet-50 dark:bg-violet-950/60 text-violet-600 w-fit">
-                <CheckCircle className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                No Registration Needed
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                Save time with zero account friction. Open CalcNest, compute your result in seconds, and copy your answer with one click.
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-xs space-y-3">
-              <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 w-fit">
-                <Smartphone className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                Mobile-First Design
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                Engineered with touch-friendly inputs, zero layout shifts, dark mode support, and rapid responsiveness across smartphones and laptops.
+                No subscription paywalls, no email registrations, and no artificial daily document quotas. Ready whenever you need it.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Homepage FAQ Section */}
+      {/* Homepage FAQs */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <FAQSection faqs={homeFaqs} />
       </section>

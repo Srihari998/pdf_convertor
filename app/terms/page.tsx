@@ -2,9 +2,9 @@ import { Metadata } from 'next';
 import { Breadcrumbs } from '../../components/layout/Breadcrumbs';
 
 export const metadata: Metadata = {
-  title: 'Terms of Service — CalcNest',
+  title: 'Terms of Service — DocumentNest',
   description:
-    'CalcNest Terms of Service and general website usage conditions, warranties, and informational disclaimers.',
+    'DocumentNest Terms of Service, usage conditions, and limitations.',
 };
 
 export default function TermsPage() {
@@ -17,7 +17,7 @@ export default function TermsPage() {
           Terms of Service
         </h1>
         <p className="text-xs sm:text-sm text-slate-500">
-          Last updated: September 1, 2026
+          Last updated: September 4, 2026
         </p>
       </div>
 
@@ -25,34 +25,28 @@ export default function TermsPage() {
         <section className="space-y-3">
           <h2 className="text-lg font-bold text-slate-900 dark:text-white">1. Acceptance of Terms</h2>
           <p>
-            By accessing and using CalcNest (&ldquo;the website&rdquo;), you agree to comply with and be bound by these Terms of Service. If you do not agree to these terms, please do not use our website.
+            By accessing and using DocumentNest, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our utilities.
           </p>
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white">2. Educational &amp; Informational Disclaimers</h2>
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white">2. Acceptable Use</h2>
           <p>
-            <strong>Financial Calculations:</strong> Results provided by loan EMI, SIP, mutual fund, salary, GST, and investment calculators are estimates for informational and educational purposes only. They do not constitute certified financial advice or loan commitments. Actual rates and payments may vary based on financial institutions and tax laws.
-          </p>
-          <p>
-            <strong>Health Tools:</strong> BMI, BMR, and hydration calculations are general health estimates and do not replace certified medical diagnosis or clinical healthcare consultation.
-          </p>
-          <p>
-            <strong>Academic Tools:</strong> Grade conversions and attendance calculators are tools to aid student planning. University grading policies and attendance shortage regulations vary by institution.
+            You may use DocumentNest for personal, educational, and commercial document processing purposes. You agree not to use the service to process unlawful or malicious files or attempt to reverse-engineer client assets.
           </p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-bold text-slate-900 dark:text-white">3. Disclaimer of Warranties</h2>
           <p>
-            CalcNest provides all calculators and utilities on an &ldquo;as is&rdquo; and &ldquo;as available&rdquo; basis without warranties of any kind, whether express or implied. While we take pride in mathematical precision, we do not guarantee that the tools will be completely error-free or uninterrupted.
+            DocumentNest is provided on an &ldquo;as is&rdquo; and &ldquo;as available&rdquo; basis. While our client-side WebAssembly engines aim for high fidelity, we do not warrant that all document layouts or font encodings will be 100% error-free. Always keep backups of your original documents.
           </p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-bold text-slate-900 dark:text-white">4. Limitation of Liability</h2>
           <p>
-            In no event shall CalcNest or its creators be held liable for any direct, indirect, incidental, or consequential damages resulting from the use or inability to use any tool on this website.
+            In no event shall DocumentNest or its contributors be held liable for any damages or data loss resulting from the use or inability to use this platform.
           </p>
         </section>
       </div>

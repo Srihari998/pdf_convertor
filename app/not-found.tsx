@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Calculator, ArrowRight, Home, Search } from 'lucide-react';
+import { FileText, ArrowRight, Home, Search } from 'lucide-react';
 import { getPopularTools } from '../lib/tools/registry';
 import { ToolCard } from '../components/common/ToolCard';
 
@@ -13,10 +13,10 @@ export default function NotFound() {
           404
         </div>
         <h1 className="text-3xl font-black text-slate-950 dark:text-white">
-          Calculator Not Found
+          Document Tool Not Found
         </h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-          The tool or page you are looking for might have been moved or renamed. Try searching below or explore popular calculators.
+          The tool or page you are looking for might have been moved. Try searching or browse our popular PDF tools below.
         </p>
 
         <div className="pt-2 flex items-center justify-center gap-3">

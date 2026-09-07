@@ -6,53 +6,53 @@ import { FAQItem } from '../../lib/types';
 
 interface FAQSectionProps {
   faqs: FAQItem[];
-  className?: string;
+  title?: string;
 }
 
-export function FAQSection({ faqs, className = '' }: FAQSectionProps) {
-  const [openIndices, setOpenIndices] = useState<number[]>([0]);
+export function FAQSection({
+  faqs,
+  title = 'Frequently Asked Questions',
+}: FAQSectionProps) {
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   if (!faqs || faqs.length === 0) return null;
 
-  const toggleIndex = (index: number) => {
-    setOpenIndices((prev) =>
-      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
-    );
-  };
-
   return (
-    <section className={`rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 sm:p-6 shadow-xs ${className}`}>
-      <div className="flex items-center gap-2.5 mb-5">
-        <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400">
+    <section className="space-y-4">
+      <div className="flex items-center gap-2.5">
+        <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400">
           <HelpCircle className="w-5 h-5" />
         </div>
-        <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-          Frequently Asked Questions
+        <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+          {title}
         </h2>
       </div>
 
-      <div className="divide-y divide-slate-100 dark:divide-slate-800">
-        {faqs.map((faq, idx) => {
-          const isOpen = openIndices.includes(idx);
+      <div className="space-y-3">
+        {faqs.map((faq, index) => {
+          const isOpen = openIndex === index;
           return (
-            <div key={idx} className="py-3.5 first:pt-0 last:pb-0">
+            <div
+              key={index}
+              className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 overflow-hidden transition-colors"
+            >
               <button
                 type="button"
-                onClick={() => toggleIndex(idx)}
+                onClick={() => setOpenIndex(isOpen ? null : index)}
+                className="flex items-center justify-between w-full p-4 sm:p-5 text-left font-semibold text-slate-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
                 aria-expanded={isOpen}
-                className="w-full flex items-center justify-between gap-4 text-left font-semibold text-sm sm:text-base text-slate-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer py-1"
               >
-                <span>{faq.question}</span>
+                <span className="text-sm sm:text-base pr-4">{faq.question}</span>
                 <ChevronDown
-                  className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ${
-                    isOpen ? 'rotate-180 text-blue-600 dark:text-blue-400' : ''
+                  className={`w-5 h-5 shrink-0 text-slate-400 transition-transform duration-200 ${
+                    isOpen ? 'rotate-180 text-blue-600' : ''
                   }`}
                 />
               </button>
 
               {isOpen && (
-                <div className="mt-2.5 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed pr-6">
-                  <p>{faq.answer}</p>
+                <div className="px-4 sm:px-5 pb-5 pt-0 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-slate-800/60 mt-1 pt-3">
+                  {faq.answer}
                 </div>
               )}
             </div>

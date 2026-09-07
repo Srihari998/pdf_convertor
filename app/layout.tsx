@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import Script from 'next/script';
 import './globals.css';
 import { ThemeProvider } from '../components/layout/ThemeProvider';
 import { Header } from '../components/layout/Header';
@@ -13,27 +12,28 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://calcnest-three.vercel.app'),
+  metadataBase: new URL('https://documentnest.vercel.app'),
   title: {
-    default: 'CalcNest — Free Calculators and Useful Online Tools',
-    template: '%s | CalcNest',
+    default: 'DocumentNest — Free Online PDF, Document & Image Tools',
+    template: '%s | DocumentNest',
   },
   description:
-    'Free online calculators and fast utility tools. Calculate loan EMI, CGPA, attendance thresholds, percentages, convert units, format JSON, and generate passwords instantly.',
+    'Free online tools to merge, split, compress, rotate, edit, and convert PDF documents, images, and text files. 100% private in-browser WebAssembly processing.',
   keywords: [
-    'free calculators',
-    'online calculators',
-    'emi calculator',
-    'cgpa calculator',
-    'attendance calculator',
-    'percentage calculator',
-    'unit converter',
-    'json formatter',
-    'calcnest',
+    'merge pdf',
+    'split pdf',
+    'compress pdf',
+    'pdf editor',
+    'image to pdf',
+    'pdf to jpg',
+    'image ocr',
+    'compress image',
+    'free pdf tools',
+    'documentnest',
   ],
-  authors: [{ name: 'CalcNest Team' }],
-  creator: 'CalcNest',
-  publisher: 'CalcNest',
+  authors: [{ name: 'DocumentNest Team' }],
+  creator: 'DocumentNest',
+  publisher: 'DocumentNest',
   robots: {
     index: true,
     follow: true,
@@ -45,17 +45,17 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://calcnest-three.vercel.app',
-    siteName: 'CalcNest',
-    title: 'CalcNest — Free Calculators and Useful Online Tools',
+    url: 'https://documentnest.vercel.app',
+    siteName: 'DocumentNest',
+    title: 'DocumentNest — Free Online PDF, Document & Image Tools',
     description:
-      'Calculate, convert, generate, and solve everyday academic, financial, and developer problems instantly.',
+      'Edit, convert, merge, split, compress and manage your documents directly in your browser with 100% privacy.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'CalcNest — Free Calculators and Useful Online Tools',
+    title: 'DocumentNest — Free Online PDF, Document & Image Tools',
     description:
-      'Free calculators and fast utility tools that run 100% locally in your browser.',
+      'Fast, private, and free document utilities running entirely inside your web browser.',
   },
 };
 
@@ -66,13 +66,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning className={inter.variable}>
-      <head>
-        {/* Adsterra Social Bar Monetization Script */}
-        <Script
-          strategy="afterInteractive"
-          src="https://pl31135458.profitableratecpmnetwork.com/20/56/56/205656646f830bcddd93696ae88ec543.js"
-        />
-      </head>
       <body className="min-h-screen flex flex-col bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased selection:bg-blue-500 selection:text-white transition-colors">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <Header />
