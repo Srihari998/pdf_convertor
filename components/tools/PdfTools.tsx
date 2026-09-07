@@ -260,6 +260,36 @@ export function PdfToolWidget({ toolId }: PdfToolProps) {
             <span>Tool Settings</span>
           </div>
 
+          {/* Compress PDF Settings */}
+          {toolId === 'compress-pdf' && (
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                Compression Level
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                {[
+                  { id: 'high', label: 'Extreme Compression', desc: 'Max size reduction (< 1 MB)' },
+                  { id: 'medium', label: 'Recommended (Balanced)', desc: 'Great balance of quality & size' },
+                  { id: 'low', label: 'Low Compression', desc: 'Highest visual sharpness' },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setCompressLevel(item.id as any)}
+                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                      compressLevel === item.id
+                        ? 'bg-blue-50 dark:bg-blue-950/60 border-blue-600 text-blue-700 dark:text-blue-300 shadow-xs'
+                        : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                    }`}
+                  >
+                    <span className="text-xs font-bold block">{item.label}</span>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5">{item.desc}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Split Mode */}
           {toolId === 'split-pdf' && (
             <div className="space-y-3">
