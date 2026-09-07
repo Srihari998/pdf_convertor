@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import Script from 'next/script';
 import './globals.css';
 import { ThemeProvider } from '../components/layout/ThemeProvider';
 import { Header } from '../components/layout/Header';
@@ -12,7 +13,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://calcnest.com'),
+  metadataBase: new URL('https://calcnest-three.vercel.app'),
   title: {
     default: 'CalcNest — Free Calculators and Useful Online Tools',
     template: '%s | CalcNest',
@@ -44,7 +45,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://calcnest.com',
+    url: 'https://calcnest-three.vercel.app',
     siteName: 'CalcNest',
     title: 'CalcNest — Free Calculators and Useful Online Tools',
     description:
@@ -65,6 +66,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning className={inter.variable}>
+      <head>
+        {/* Adsterra Social Bar Monetization Script */}
+        <Script
+          strategy="afterInteractive"
+          src="https://pl31135458.profitableratecpmnetwork.com/20/56/56/205656646f830bcddd93696ae88ec543.js"
+        />
+      </head>
       <body className="min-h-screen flex flex-col bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased selection:bg-blue-500 selection:text-white transition-colors">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <Header />
