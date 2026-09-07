@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   mergePdfs,
   splitPdf,
@@ -11,13 +11,16 @@ import {
   watermarkPdf,
   addPageNumbersToPdf,
   editPdfMetadata,
+  getPdfMetadata,
   compressPdf,
   imagesToPdf,
+  pdfToImages,
 } from '../../lib/pdf/engine';
 import { UploadedFileItem, ProcessedResult, ProcessingProgress } from '../../lib/types';
 import { UniversalUploader } from '../common/UniversalUploader';
 import { FileProgress } from '../common/FileProgress';
 import { ResultDownloadCard } from '../common/ResultDownloadCard';
+import { PdfEditorWidget } from './PdfEditorWidget';
 import { AlertCircle, Play, Sliders } from 'lucide-react';
 
 interface PdfToolProps {
@@ -48,6 +51,23 @@ export function PdfToolWidget({ toolId }: PdfToolProps) {
   const [compressLevel, setCompressLevel] = useState<'low' | 'medium' | 'high'>('medium');
   const [imgPdfSize, setImgPdfSize] = useState<'a4' | 'letter' | 'fit'>('a4');
   const [imgPdfOrient, setImgPdfOrient] = useState<'portrait' | 'landscape'>('portrait');
+  const [pdfToImgFormat, setPdfToImgFormat] = useState<'image/jpeg' | 'image/png'>('image/jpeg');
+  const [pdfToImgScale, setPdfToImgScale] = useState<number>(1.5);
+
+  // Auto-fill existing metadata when user uploads a file to metadata-editor
+  useEffect(() => {
+    if (toolId === 'metadata-editor' && files.length > 0) {
+      files[0].file.arrayBuffer().then((buf) => {
+        getPdfMetadata(buf)
+          .then((meta) => {
+            if (meta.title) setMetaTitle(meta.title);
+            if (meta.author) setMetaAuthor(meta.author);
+            if (meta.subject) setMetaSubject(meta.subject);
+          })
+          .catch(() => {});
+      });
+    }
+  }, [files, toolId]);
 
   const handleProcess = async () => {
     if (files.length === 0) return;
@@ -194,6 +214,18 @@ export function PdfToolWidget({ toolId }: PdfToolProps) {
           break;
         }
 
+        case 'pdf-to-jpg': {
+          const buffer = await files[0].file.arrayBuffer();
+          res = await pdfToImages(
+            buffer,
+            files[0].name,
+            pdfToImgFormat,
+            pdfToImgScale,
+            (p, s) => setProgress({ percentage: p, statusText: s })
+          );
+          break;
+        }
+
         case 'jpg-to-pdf': {
           const images = await Promise.all(
             files.map(async (f) => ({
@@ -234,11 +266,16 @@ export function PdfToolWidget({ toolId }: PdfToolProps) {
     setError(null);
   };
 
+  // If PDF Editor and file is loaded, render the interactive studio!
+  if (toolId === 'pdf-editor' && files.length > 0) {
+    return <PdfEditorWidget file={files[0].file} onReset={handleReset} />;
+  }
+
   if (result) {
     return <ResultDownloadCard result={result} onReset={handleReset} />;
   }
 
-  const isMultiFile = ['merge-pdf', 'jpg-to-pdf', 'image-to-pdf'].includes(toolId);
+  const isMultiFile = ['merge-pdf', 'jpg-to-pdf'].includes(toolId);
   const accepted = toolId === 'jpg-to-pdf' ? ['.jpg', '.jpeg', '.png', '.webp'] : ['.pdf', 'application/pdf'];
 
   return (
@@ -259,6 +296,50 @@ export function PdfToolWidget({ toolId }: PdfToolProps) {
             <Sliders className="w-4 h-4 text-blue-600" />
             <span>Tool Settings</span>
           </div>
+
+          {/* PDF to JPG Settings */}
+          {toolId === 'pdf-to-jpg' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Export Image Format
+                </label>
+                <div className="flex gap-2">
+                  {[
+                    { format: 'image/jpeg', label: 'JPG (Standard / Compact)' },
+                    { format: 'image/png', label: 'PNG (Lossless Quality)' },
+                  ].map((f) => (
+                    <button
+                      key={f.format}
+                      type="button"
+                      onClick={() => setPdfToImgFormat(f.format as any)}
+                      className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
+                        pdfToImgFormat === f.format
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : 'border-slate-300 dark:border-slate-700'
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Render Resolution / DPI
+                </label>
+                <select
+                  value={pdfToImgScale}
+                  onChange={(e) => setPdfToImgScale(parseFloat(e.target.value))}
+                  className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 text-sm"
+                >
+                  <option value={1.5}>1.5x (~150 DPI) — Recommended</option>
+                  <option value={2.0}>2.0x (~200 DPI) — High Sharpness</option>
+                  <option value={2.5}>2.5x (~300 DPI) — Ultra HD Print Quality</option>
+                </select>
+              </div>
+            </div>
+          )}
 
           {/* Compress PDF Settings */}
           {toolId === 'compress-pdf' && (

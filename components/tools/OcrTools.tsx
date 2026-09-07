@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { recognizeImageText } from '../../lib/ocr/engine';
+import { recognizeImageText, extractTextFromPdf } from '../../lib/ocr/engine';
 import { UploadedFileItem, ProcessedResult, ProcessingProgress } from '../../lib/types';
 import { UniversalUploader } from '../common/UniversalUploader';
 import { FileProgress } from '../common/FileProgress';
 import { ResultDownloadCard } from '../common/ResultDownloadCard';
-import { Copy, Check, AlertCircle, Play, ScanText } from 'lucide-react';
+import { Copy, Check, AlertCircle, ScanText, FileText } from 'lucide-react';
 
 interface OcrToolProps {
   toolId: string;
@@ -21,23 +21,35 @@ export function OcrToolWidget({ toolId }: OcrToolProps) {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const isPdf = toolId === 'pdf-to-text';
+
   const handleProcess = async () => {
     if (files.length === 0) return;
     setError(null);
-    setProgress({ percentage: 5, statusText: 'Initializing Tesseract WebAssembly engine...' });
+    setProgress({ percentage: 5, statusText: 'Initializing WebAssembly OCR engine...' });
 
     try {
-      const res = await recognizeImageText(files[0].file, (p, s) =>
-        setProgress({ percentage: p, statusText: s })
-      );
-
-      setExtractedText(res.text);
-      setConfidence(Math.round(res.confidence));
-      setResult(res.result);
+      if (isPdf) {
+        const res = await extractTextFromPdf(files[0].file, (p, s) =>
+          setProgress({ percentage: p, statusText: s })
+        );
+        setExtractedText(res.text);
+        setConfidence(res.confidence ?? null);
+        setResult(res.result);
+      } else {
+        const res = await recognizeImageText(files[0].file, (p, s) =>
+          setProgress({ percentage: p, statusText: s })
+        );
+        setExtractedText(res.text);
+        setConfidence(Math.round(res.confidence));
+        setResult(res.result);
+      }
       setProgress(null);
     } catch (err: any) {
       console.error(err);
-      setError(err.message || 'Optical Character Recognition failed. Ensure the image contains clear text.');
+      setError(
+        err.message || 'Text extraction failed. Please ensure the document or photo has readable text.'
+      );
       setProgress(null);
     }
   };
@@ -62,13 +74,17 @@ export function OcrToolWidget({ toolId }: OcrToolProps) {
     <div className="space-y-6">
       {!result && (
         <UniversalUploader
-          acceptedTypes={['.jpg', '.jpeg', '.png', '.webp', '.bmp']}
-          maxFileSizeMB={20}
+          acceptedTypes={isPdf ? ['.pdf', 'application/pdf'] : ['.jpg', '.jpeg', '.png', '.webp', '.bmp']}
+          maxFileSizeMB={isPdf ? 30 : 20}
           maxFiles={1}
           files={files}
           onFilesChange={setFiles}
-          label="Upload Scanned Photo or Document"
-          sublabel="Tesseract WebAssembly will extract text locally in your browser"
+          label={isPdf ? 'Upload PDF Document to Extract Text' : 'Upload Scanned Photo or Document'}
+          sublabel={
+            isPdf
+              ? 'Multi-page text layer extraction & OCR directly in your browser'
+              : 'Tesseract WebAssembly neural network will extract text locally in your browser'
+          }
         />
       )}
 
@@ -88,8 +104,8 @@ export function OcrToolWidget({ toolId }: OcrToolProps) {
             onClick={handleProcess}
             className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-base shadow-lg shadow-blue-500/20 transition-all active:scale-95 cursor-pointer"
           >
-            <ScanText className="w-5 h-5" />
-            <span>Recognize &amp; Extract Text</span>
+            {isPdf ? <FileText className="w-5 h-5" /> : <ScanText className="w-5 h-5" />}
+            <span>{isPdf ? 'Extract PDF Text' : 'Recognize & Extract Text'}</span>
           </button>
         </div>
       )}
@@ -100,7 +116,7 @@ export function OcrToolWidget({ toolId }: OcrToolProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Extracted Text
+                Extracted Text Result
               </span>
               {confidence !== null && (
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300">
@@ -112,17 +128,17 @@ export function OcrToolWidget({ toolId }: OcrToolProps) {
             <button
               type="button"
               onClick={handleCopy}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-semibold text-xs transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-semibold text-xs hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors cursor-pointer"
             >
               {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copied ? 'Copied!' : 'Copy Text'}</span>
+              <span>{copied ? 'Copied to Clipboard!' : 'Copy Text'}</span>
             </button>
           </div>
 
           <textarea
             readOnly
             value={extractedText}
-            rows={10}
+            rows={12}
             className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 p-4 font-mono text-xs sm:text-sm text-slate-900 dark:text-white"
           />
 

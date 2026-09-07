@@ -1,4 +1,5 @@
 import { PDFDocument, rgb, degrees, StandardFonts } from 'pdf-lib';
+import JSZip from 'jszip';
 import { ProcessedResult, ProcessedOutputFile } from '../types';
 
 export async function getPdfPageCount(arrayBuffer: ArrayBuffer): Promise<number> {
@@ -109,6 +110,24 @@ export async function splitPdf(
       mimeType: 'application/pdf',
       size: blob.size,
       url: URL.createObjectURL(blob),
+    });
+  }
+
+  // If multiple outputs, generate a ZIP bundle for 1-click download
+  if (outputs.length > 1) {
+    onProgress?.(95, 'Packaging ZIP bundle...');
+    const zip = new JSZip();
+    for (const out of outputs) {
+      const arrBuf = await out.blob.arrayBuffer();
+      zip.file(out.filename, arrBuf);
+    }
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    outputs.unshift({
+      blob: zipBlob,
+      filename: `${baseName}_all_pages.zip`,
+      mimeType: 'application/zip',
+      size: zipBlob.size,
+      url: URL.createObjectURL(zipBlob),
     });
   }
 
@@ -592,6 +611,28 @@ export async function addPageNumbersToPdf(
 }
 
 /**
+ * Extract existing metadata from a PDF file
+ */
+export async function getPdfMetadata(buffer: ArrayBuffer): Promise<{
+  title: string;
+  author: string;
+  subject: string;
+  keywords: string;
+  creator: string;
+  producer: string;
+}> {
+  const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
+  return {
+    title: pdfDoc.getTitle() || '',
+    author: pdfDoc.getAuthor() || '',
+    subject: pdfDoc.getSubject() || '',
+    keywords: pdfDoc.getKeywords() || '',
+    creator: pdfDoc.getCreator() || '',
+    producer: pdfDoc.getProducer() || '',
+  };
+}
+
+/**
  * Edit PDF Metadata
  */
 export async function editPdfMetadata(
@@ -809,4 +850,204 @@ function parsePageRanges(rangeStr: string, maxPages: number): number[] {
   }
 
   return Array.from(indices).sort((a, b) => a - b);
+}
+
+/**
+ * Convert PDF pages to high-resolution JPG or PNG images
+ */
+export async function pdfToImages(
+  buffer: ArrayBuffer,
+  filename: string,
+  format: 'image/jpeg' | 'image/png' = 'image/jpeg',
+  scale: number = 1.5,
+  onProgress?: (percent: number, status: string) => void
+): Promise<ProcessedResult> {
+  const startTime = Date.now();
+  onProgress?.(10, 'Loading PDF document renderer...');
+
+  // @ts-ignore
+  const pdfjsLib = await import('pdfjs-dist/build/pdf.mjs');
+  if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version || '4.10.38'}/build/pdf.worker.min.mjs`;
+  }
+
+  const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(buffer) });
+  const pdf = await loadingTask.promise;
+  const numPages = pdf.numPages;
+  const outputs: ProcessedOutputFile[] = [];
+  const baseName = filename.replace(/\.[^/.]+$/, '');
+  const ext = format === 'image/jpeg' ? 'jpg' : 'png';
+
+  for (let i = 1; i <= numPages; i++) {
+    onProgress?.(
+      Math.round(15 + (i / numPages) * 75),
+      `Rendering page ${i} of ${numPages} as high-res image...`
+    );
+    const page = await pdf.getPage(i);
+    const viewport = page.getViewport({ scale });
+
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      if (format === 'image/jpeg') {
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+      await page.render({ canvasContext: ctx as any, viewport }).promise;
+
+      const blob: Blob = await new Promise((resolve) => {
+        canvas.toBlob((b) => resolve(b || new Blob()), format, 0.92);
+      });
+
+      outputs.push({
+        blob,
+        filename: `${baseName}_page_${i}.${ext}`,
+        mimeType: format,
+        size: blob.size,
+        url: URL.createObjectURL(blob),
+      });
+    }
+  }
+
+  // If multiple pages, generate a ZIP bundle for 1-click download
+  if (outputs.length > 1) {
+    onProgress?.(95, 'Packaging ZIP archive...');
+    const zip = new JSZip();
+    for (const out of outputs) {
+      const arrBuf = await out.blob.arrayBuffer();
+      zip.file(out.filename, arrBuf);
+    }
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    outputs.unshift({
+      blob: zipBlob,
+      filename: `${baseName}_all_images.zip`,
+      mimeType: 'application/zip',
+      size: zipBlob.size,
+      url: URL.createObjectURL(zipBlob),
+    });
+  }
+
+  onProgress?.(100, 'Complete!');
+  return {
+    success: true,
+    outputs,
+    stats: {
+      originalSize: buffer.byteLength,
+      processedSize: outputs.reduce((acc, o) => acc + o.size, 0),
+      pageCount: numPages,
+      processingTimeMs: Date.now() - startTime,
+    },
+  };
+}
+
+/**
+ * Annotate & Sign PDF
+ */
+export async function annotatePdf(
+  buffer: ArrayBuffer,
+  filename: string,
+  annotations: {
+    pageNumber: number;
+    type: 'text' | 'signature' | 'highlight' | 'rectangle';
+    x: number;
+    y: number;
+    text?: string;
+    fontSize?: number;
+    color?: { r: number; g: number; b: number };
+    signatureDataUrl?: string;
+    width?: number;
+    height?: number;
+  }[],
+  onProgress?: (percent: number, status: string) => void
+): Promise<ProcessedResult> {
+  const startTime = Date.now();
+  onProgress?.(20, 'Loading PDF document...');
+  const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
+  const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const totalPages = pdfDoc.getPageCount();
+
+  onProgress?.(50, 'Applying annotations and signatures...');
+  for (const ann of annotations) {
+    const pageIdx = ann.pageNumber - 1;
+    if (pageIdx >= 0 && pageIdx < totalPages) {
+      const page = pdfDoc.getPage(pageIdx);
+      const { width, height } = page.getSize();
+
+      const absX = (ann.x / 100) * width;
+      const absY = height - (ann.y / 100) * height;
+
+      if (ann.type === 'text' && ann.text) {
+        const col = ann.color || { r: 0.1, g: 0.1, b: 0.1 };
+        page.drawText(ann.text, {
+          x: absX,
+          y: Math.max(10, absY),
+          size: ann.fontSize || 14,
+          font,
+          color: rgb(col.r, col.g, col.b),
+        });
+      } else if (ann.type === 'signature' && ann.signatureDataUrl) {
+        const base64Data = ann.signatureDataUrl.split(',')[1];
+        const binaryString = atob(base64Data);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        const sigImg = await pdfDoc.embedPng(bytes);
+        const sigWidth = ann.width || 140;
+        const sigHeight = ann.height || 60;
+        page.drawImage(sigImg, {
+          x: absX,
+          y: Math.max(10, absY - sigHeight),
+          width: sigWidth,
+          height: sigHeight,
+        });
+      } else if (ann.type === 'highlight') {
+        page.drawRectangle({
+          x: absX,
+          y: Math.max(10, absY - (ann.height || 20)),
+          width: ann.width || 120,
+          height: ann.height || 20,
+          color: rgb(1, 1, 0),
+          opacity: 0.4,
+        });
+      } else if (ann.type === 'rectangle') {
+        page.drawRectangle({
+          x: absX,
+          y: Math.max(10, absY - (ann.height || 40)),
+          width: ann.width || 100,
+          height: ann.height || 40,
+          borderColor: rgb(0.8, 0.1, 0.1),
+          borderWidth: 2,
+          opacity: 0,
+        });
+      }
+    }
+  }
+
+  onProgress?.(85, 'Saving annotated PDF...');
+  const bytes = await pdfDoc.save();
+  const blob = new Blob([bytes as any], { type: 'application/pdf' });
+  const baseName = filename.replace(/\.[^/.]+$/, '');
+
+  onProgress?.(100, 'Complete!');
+  return {
+    success: true,
+    outputs: [
+      {
+        blob,
+        filename: `${baseName}_edited.pdf`,
+        mimeType: 'application/pdf',
+        size: blob.size,
+        url: URL.createObjectURL(blob),
+      },
+    ],
+    stats: {
+      originalSize: buffer.byteLength,
+      processedSize: blob.size,
+      pageCount: totalPages,
+      processingTimeMs: Date.now() - startTime,
+    },
+  };
 }

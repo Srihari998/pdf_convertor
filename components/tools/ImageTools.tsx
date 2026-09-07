@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   compressImage,
   resizeImage,
@@ -11,11 +11,19 @@ import { UploadedFileItem, ProcessedResult, ProcessingProgress } from '../../lib
 import { UniversalUploader } from '../common/UniversalUploader';
 import { FileProgress } from '../common/FileProgress';
 import { ResultDownloadCard } from '../common/ResultDownloadCard';
-import { AlertCircle, Play, Sliders } from 'lucide-react';
+import { AlertCircle, Play, Sliders, Lock, Unlock } from 'lucide-react';
 
 interface ImageToolProps {
   toolId: string;
 }
+
+const PRESETS = [
+  { label: 'Instagram Post (1:1)', width: 1080, height: 1080 },
+  { label: 'Instagram Story (9:16)', width: 1080, height: 1920 },
+  { label: 'YouTube Thumbnail (16:9)', width: 1280, height: 720 },
+  { label: 'Twitter/X Header (3:1)', width: 1500, height: 500 },
+  { label: 'Full HD (1080p)', width: 1920, height: 1080 },
+];
 
 export function ImageToolWidget({ toolId }: ImageToolProps) {
   const [files, setFiles] = useState<UploadedFileItem[]>([]);
@@ -27,9 +35,50 @@ export function ImageToolWidget({ toolId }: ImageToolProps) {
   const [quality, setQuality] = useState<number>(75);
   const [targetWidth, setTargetWidth] = useState<string>('1200');
   const [targetHeight, setTargetHeight] = useState<string>('800');
+  const [aspectRatioLock, setAspectRatioLock] = useState<boolean>(true);
+  const [aspectRatio, setAspectRatio] = useState<number>(1.5);
   const [convertTargetMime, setConvertTargetMime] = useState<'image/jpeg' | 'image/png' | 'image/webp'>('image/webp');
   const [imgPdfSize, setImgPdfSize] = useState<'a4' | 'letter' | 'fit'>('a4');
   const [imgPdfOrient, setImgPdfOrient] = useState<'portrait' | 'landscape'>('portrait');
+
+  // Detect image dimensions on file upload
+  useEffect(() => {
+    if (files.length > 0 && toolId === 'resize-image') {
+      const img = new Image();
+      const url = URL.createObjectURL(files[0].file);
+      img.onload = () => {
+        setTargetWidth(img.naturalWidth.toString());
+        setTargetHeight(img.naturalHeight.toString());
+        if (img.naturalHeight > 0) {
+          setAspectRatio(img.naturalWidth / img.naturalHeight);
+        }
+        URL.revokeObjectURL(url);
+      };
+      img.src = url;
+    }
+  }, [files, toolId]);
+
+  const handleWidthChange = (val: string) => {
+    setTargetWidth(val);
+    const num = parseInt(val, 10);
+    if (!isNaN(num) && aspectRatioLock && aspectRatio > 0) {
+      setTargetHeight(Math.round(num / aspectRatio).toString());
+    }
+  };
+
+  const handleHeightChange = (val: string) => {
+    setTargetHeight(val);
+    const num = parseInt(val, 10);
+    if (!isNaN(num) && aspectRatioLock && aspectRatio > 0) {
+      setTargetWidth(Math.round(num * aspectRatio).toString());
+    }
+  };
+
+  const applyPreset = (w: number, h: number) => {
+    setTargetWidth(w.toString());
+    setTargetHeight(h.toString());
+    setAspectRatio(w / h);
+  };
 
   const handleProcess = async () => {
     if (files.length === 0) return;
@@ -163,28 +212,59 @@ export function ImageToolWidget({ toolId }: ImageToolProps) {
 
           {/* Resize Controls */}
           {toolId === 'resize-image' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-4">
+              {/* Presets */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Target Width (px)
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                  Social Media &amp; Standard Presets
                 </label>
-                <input
-                  type="number"
-                  value={targetWidth}
-                  onChange={(e) => setTargetWidth(e.target.value)}
-                  className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-2.5 text-sm"
-                />
+                <div className="flex flex-wrap gap-2">
+                  {PRESETS.map((p) => (
+                    <button
+                      key={p.label}
+                      type="button"
+                      onClick={() => applyPreset(p.width, p.height)}
+                      className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-blue-500 text-xs font-semibold text-slate-700 dark:text-slate-300 transition-colors"
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Target Height (px)
-                </label>
-                <input
-                  type="number"
-                  value={targetHeight}
-                  onChange={(e) => setTargetHeight(e.target.value)}
-                  className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-2.5 text-sm"
-                />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    Target Width (px)
+                  </label>
+                  <input
+                    type="number"
+                    value={targetWidth}
+                    onChange={(e) => handleWidthChange(e.target.value)}
+                    className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-2.5 text-sm"
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      Target Height (px)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setAspectRatioLock(!aspectRatioLock)}
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400"
+                    >
+                      {aspectRatioLock ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
+                      <span>{aspectRatioLock ? 'Locked Ratio' : 'Unlocked'}</span>
+                    </button>
+                  </div>
+                  <input
+                    type="number"
+                    value={targetHeight}
+                    onChange={(e) => handleHeightChange(e.target.value)}
+                    className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-2.5 text-sm"
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -195,23 +275,24 @@ export function ImageToolWidget({ toolId }: ImageToolProps) {
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
                 Convert Image To Format
               </label>
-              <div className="flex gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                 {[
-                  { mime: 'image/webp', label: 'WebP (Ultra-Compact)' },
-                  { mime: 'image/jpeg', label: 'JPG / JPEG (Universal)' },
-                  { mime: 'image/png', label: 'PNG (Lossless / Transparent)' },
+                  { mime: 'image/webp', label: 'WebP', desc: 'Ultra-compact modern web format' },
+                  { mime: 'image/jpeg', label: 'JPG / JPEG', desc: 'Universally compatible format' },
+                  { mime: 'image/png', label: 'PNG', desc: 'Lossless with transparency support' },
                 ].map((item) => (
                   <button
                     key={item.mime}
                     type="button"
                     onClick={() => setConvertTargetMime(item.mime as any)}
-                    className={`px-4 py-2.5 rounded-xl text-xs font-bold border transition-colors ${
+                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
                       convertTargetMime === item.mime
-                        ? 'bg-blue-600 text-white border-blue-600'
-                        : 'border-slate-300 dark:border-slate-700'
+                        ? 'bg-blue-50 dark:bg-blue-950/60 border-blue-600 text-blue-700 dark:text-blue-300 shadow-xs'
+                        : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
                     }`}
                   >
-                    {item.label}
+                    <span className="text-xs font-bold block">{item.label}</span>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5">{item.desc}</span>
                   </button>
                 ))}
               </div>

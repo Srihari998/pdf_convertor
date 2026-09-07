@@ -2,23 +2,34 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import { marked } from 'marked';
 import { ProcessedResult } from '../types';
 
+export interface DocumentPdfOptions {
+  fontSize?: number;
+  margin?: number;
+  lineHeight?: number;
+  fontFamily?: 'sans' | 'serif' | 'mono';
+}
+
 export async function textToPdf(
   text: string,
   filename: string = 'document.pdf',
-  options: {
-    fontSize?: number;
-    margin?: number;
-    lineHeight?: number;
-  } = {},
+  options: DocumentPdfOptions = {},
   onProgress?: (percent: number, status: string) => void
 ): Promise<ProcessedResult> {
   const startTime = Date.now();
   onProgress?.(20, 'Initializing PDF document...');
   const pdfDoc = await PDFDocument.create();
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+  let selectedFont = StandardFonts.Helvetica;
+  if (options.fontFamily === 'serif') {
+    selectedFont = StandardFonts.TimesRoman;
+  } else if (options.fontFamily === 'mono') {
+    selectedFont = StandardFonts.Courier;
+  }
+
+  const font = await pdfDoc.embedFont(selectedFont);
   const fontSize = options.fontSize || 11;
   const margin = options.margin || 40;
-  const lineHeight = options.lineHeight || fontSize * 1.4;
+  const lineHeight = options.lineHeight || fontSize * 1.45;
 
   const pageWidth = 595.28; // A4 width
   const pageHeight = 841.89; // A4 height
@@ -40,7 +51,13 @@ export async function textToPdf(
 
     for (const word of words) {
       const testLine = currentLine ? `${currentLine} ${word}` : word;
-      const testWidth = font.widthOfTextAtSize(testLine, fontSize);
+      let testWidth = 0;
+      try {
+        testWidth = font.widthOfTextAtSize(testLine, fontSize);
+      } catch {
+        // Fallback for uncommon unicode characters
+        testWidth = testLine.length * (fontSize * 0.55);
+      }
 
       if (testWidth <= printableWidth) {
         currentLine = testLine;
@@ -63,13 +80,25 @@ export async function textToPdf(
     let y = pageHeight - margin - fontSize;
     for (const line of pageLines) {
       if (line) {
-        page.drawText(line, {
-          x: margin,
-          y,
-          size: fontSize,
-          font,
-          color: rgb(0.1, 0.1, 0.1),
-        });
+        try {
+          page.drawText(line, {
+            x: margin,
+            y,
+            size: fontSize,
+            font,
+            color: rgb(0.12, 0.12, 0.12),
+          });
+        } catch {
+          // If character unsupported in standard font, strip unsupported chars
+          const sanitized = line.replace(/[^\x00-\x7F]/g, '');
+          page.drawText(sanitized, {
+            x: margin,
+            y,
+            size: fontSize,
+            font,
+            color: rgb(0.12, 0.12, 0.12),
+          });
+        }
       }
       y -= lineHeight;
     }
@@ -104,27 +133,27 @@ export async function textToPdf(
 export async function markdownToPdf(
   markdown: string,
   filename: string = 'markdown_notes.pdf',
+  options: DocumentPdfOptions = {},
   onProgress?: (percent: number, status: string) => void
 ): Promise<ProcessedResult> {
-  // Strip or parse basic markdown syntax for clean text PDF representation
   const plainText = markdown
-    .replace(/^#+\s+(.*)$/gm, '\n$1\n' + '='.repeat(30))
+    .replace(/^#+\s+(.*)$/gm, '\n$1\n' + '='.repeat(35))
     .replace(/\*\*(.*?)\*\*/g, '$1')
     .replace(/\*(.*?)\*/g, '$1')
     .replace(/`{3}[\s\S]*?`{3}/g, (m) => m.replace(/`{3}/g, ''))
     .replace(/`([^`]+)`/g, '$1')
     .replace(/\[(.*?)\]\(.*?\)/g, '$1');
 
-  return textToPdf(plainText, filename, { fontSize: 11, margin: 45 }, onProgress);
+  return textToPdf(plainText, filename, { ...options, fontSize: options.fontSize || 11, margin: options.margin || 45 }, onProgress);
 }
 
 export async function htmlToPdf(
   html: string,
   filename: string = 'html_document.pdf',
+  options: DocumentPdfOptions = {},
   onProgress?: (percent: number, status: string) => void
 ): Promise<ProcessedResult> {
-  // Clean basic HTML tags to readable text layout
   const doc = new DOMParser().parseFromString(html, 'text/html');
   const text = doc.body.innerText || doc.body.textContent || '';
-  return textToPdf(text, filename, { fontSize: 11, margin: 40 }, onProgress);
+  return textToPdf(text, filename, { ...options, fontSize: options.fontSize || 11, margin: options.margin || 40 }, onProgress);
 }
