@@ -59,6 +59,8 @@ export const metadata: Metadata = {
   },
 };
 
+import Script from 'next/script';
+
 export default function RootLayout({
   children,
 }: {
@@ -72,6 +74,12 @@ export default function RootLayout({
           <main className="flex-1 flex flex-col">{children}</main>
           <Footer />
         </ThemeProvider>
+
+        {/* Adsterra Social Bar Monetization */}
+        <Script
+          src="https://pl31226183.profitableratecpmnetwork.com/e6/75/3c/e6753cac77f23ab6093813c7fdcc5567.js"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );

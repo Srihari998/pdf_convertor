@@ -153,6 +153,9 @@ export function ToolView({ tool }: ToolViewProps) {
       {/* FAQs */}
       {tool.faqs && tool.faqs.length > 0 && <FAQSection faqs={tool.faqs} />}
 
+      {/* Sponsored Native Recommendations */}
+      <AdSlot position="native" />
+
       {/* Related Tools */}
       <RelatedTools currentTool={tool} />
     </div>
